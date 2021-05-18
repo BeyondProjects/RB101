@@ -1,0 +1,14 @@
+
+en:
+  welcome: "Welcome to Calculator! Enter your name: "
+  valid_name: "Make sure to enter a valid name."
+  first_number: "What's the first number?"
+  invalid_number: "Hmm, that's not a valid number."
+  second_number: "What's the second number?"
+  continue: "Do you want to perform another calculation? (Y to calculate again)"
+  goodbye: "Thank you for using the calcculator. Goodbye"
+  hi: "Hi #{name}!"
+
+es:
+  welcome: "Bienvenido a la calculadora! Entre su nombre:"
+  valid_name: "Asegúrese de entrar un nombre válido."

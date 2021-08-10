@@ -1,21 +1,20 @@
-def select_letter(sentence, letter)
-  selected_char = ''
-  counter = 0
+munsters = {
+  "Herman" => { "age" => 32, "gender" => "male" },
+  "Lily" => { "age" => 30, "gender" => "female" },
+  "Grandpa" => { "age" => 402, "gender" => "male" },
+  "Eddie" => { "age" => 10, "gender" => "male" },
+  "Marilyn" => { "age" => 23, "gender" => "female"}
+}
 
-  loop do
-    break if counter == sentence.size
-    current_char = sentence[counter]
-    if current_char == letter
-      selected_char << current_char
-    end
-    counter += 1
+munsters.each do |name, details|
+  case details["age"]
+  when [0..18]
+    details["age_group"] = "kid"
+  when [18..65]
+    details["age_group"] = "adult"
+  else
+    details["age_group"] = "senior"
   end
-  selected_char
 end
 
-
-
-question = 'How many times does a particular character appear in this sentence?'
-p select_letter(question, 'a') # => "aaaaaaaa"
-p select_letter(question, 't') # => "ttttt"
-p select_letter(question, 'z') # => ""
+p munsters

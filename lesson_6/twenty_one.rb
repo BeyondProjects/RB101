@@ -1,5 +1,3 @@
-require 'pry'
-
 SPADES = [*"2".."10"] + %w[J Q K A]
 HEARTS = [*"2".."10"] + %w[J Q K A]
 CLUBS = [*"2".."10"] + %w[J Q K A]
@@ -7,13 +5,17 @@ DIAMONDS = [*"2".."10"] + %w[J Q K A]
 deck = []
 
 def welcome_msg
-    system 'clear'
-    prompt "Welcome to 21. Please hit any key to begin."
-    gets.chomp
+  system 'clear'
+  prompt "Welcome to 21. First player to 5 wins!"
+  prompt "Game: #{$game_count}."
+  prompt "You have won #{$player_games_won} game/s."
+  prompt "The dealer has won #{$dealer_games_won} game/s."
+  prompt "Please hit any key to begin."
+  gets.chomp
 end
 
 def prompt(msg)
- puts "=> " + msg
+  puts "=> " + msg
 end
 
 def initialise_deck(deck)
@@ -24,7 +26,7 @@ def initialise_deck(deck)
   HEARTS.each_index do |card|
     deck << ['H', HEARTS[card]]
   end
-  
+
   CLUBS.each_index do |card|
     deck << ['C', CLUBS[card]]
   end
@@ -67,10 +69,6 @@ def initial_card_display(player_cards, dealer_cards)
   prompt "The dealer has #{dealer_cards[0]} and an unknown card."
 end
 
-def display_users_score(users_score)
-  "#{users_score}"
-end
-
 def hit?
   answer = nil
   loop do
@@ -100,17 +98,21 @@ end
 
 def detect_winner(player_score, dealer_score)
   if who_busted(player_score, dealer_score) == "Player"
+    $dealer_games_won += 1
     return "Dealer"
   elsif who_busted(player_score, dealer_score) == "Dealer"
+    $player_games_won += 1
     return "Player"
   end
 
   if player_score > dealer_score
-    return "Player"
+    $player_games_won += 1
+    "Player"
   elsif player_score < dealer_score
-    return "Dealer"
+    $dealer_games_won += 1
+    "Dealer"
   elsif player_score == dealer_score
-    return "Nobody"
+    "Nobody"
   end
 end
 
@@ -129,6 +131,7 @@ def game_over(player_score, dealer_score, dealer_cards, player_cards)
   prompt "#{detect_winner(player_score, dealer_score)} wins!"
   prompt "The dealer had #{dealer_cards} (#{dealer_score})."
   prompt "You had #{player_cards} (#{player_score})."
+  gets.chomp
 end
 
 def play_again?
@@ -146,52 +149,63 @@ def play_again?
 end
 
 loop do
-  welcome_msg
-
-  deck = initialise_deck(deck)
-  player_cards = deal(deck)
-  dealer_cards = deal(deck)
-  player_cards += deal(deck)
-  dealer_cards += deal(deck)
-
-  player_score = total(player_cards)
-  dealer_score = total(dealer_cards)
-  round = 0
-
-  initial_card_display(player_cards, dealer_cards)
-  prompt "You are on #{display_users_score(player_score)}."
-  
+  $player_games_won = 0
+  $dealer_games_won = 0
+  $game_count = 1
+   
   loop do
-    if busted?(player_score, dealer_score)
-      game_over(player_score, dealer_score, dealer_cards, player_cards)
-      break
-    elsif hit?()
-      player_cards += deal(deck)
-      player_score = total(player_cards)
-      prompt "You draw a #{player_cards.last}"
+    welcome_msg
+    deck = initialise_deck(deck)
+    player_cards = deal(deck)
+    dealer_cards = deal(deck)
+    player_cards += deal(deck)
+    dealer_cards += deal(deck)
+
+    player_score = total(player_cards)
+    dealer_score = total(dealer_cards)
+
+    initial_card_display(player_cards, dealer_cards)
+    prompt "You are on #{player_score}."
+
+    loop do
+      if busted?(player_score, dealer_score)
+        game_over(player_score, dealer_score, dealer_cards, player_cards)
+        break
+      elsif hit?
+        player_cards += deal(deck)
+        player_score = total(player_cards)
+        prompt "You draw a #{player_cards.last}"
+        gets.chomp
+        system 'clear'
+        prompt "The dealer is still showing #{dealer_cards[0]} and an unknown card."
+        prompt "Your cards are now #{player_cards}"
+        prompt "You are now on #{player_score}"
+      else
+        prompt "You choose to stay."
+        break
+      end
+    end
+
+    while dealer_score < 17 && !busted?(player_score, dealer_score)
+      prompt "The dealer is on #{dealer_score} with #{dealer_cards}."
+      prompt "The dealer hits..."
+      dealer_cards += deal(deck)
+      dealer_score = total(dealer_cards)
+      prompt "The dealer draws a #{dealer_cards.last}"
       gets.chomp
-      system 'clear'
-      prompt "The dealer is still showing #{dealer_cards[0]} and an unknown card."
-      prompt "Your cards are now #{player_cards}"
-      prompt "You are now on #{player_score}"
-    else
+    end
+
+    game_over(player_score, dealer_score, dealer_cards, player_cards)
+    $game_count += 1
+    if $player_games_won == 5
+      prompt "You have won 5 games! Congratulations!"
+      break
+    elsif $dealer_games_won == 5
+      prompt "The dealer wins! Unlucky."
       break
     end
   end
-  
-  
-  while dealer_score < 17 && !busted?(player_score, dealer_score)
-    prompt "The dealer is on #{dealer_score} with #{dealer_cards}."
-    prompt "The dealer hits..."
-    dealer_cards += deal(deck)
-    dealer_score = total(dealer_cards)
-    prompt "The dealer draws a #{dealer_cards.last}"
-    gets.chomp
-  end
 
-  game_over(player_score, dealer_score, dealer_cards, player_cards)
-  
   break unless play_again?
 end
-  
 prompt "Thanks for playing 21!"
